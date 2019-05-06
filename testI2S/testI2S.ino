@@ -557,6 +557,6 @@ long     lastHandle = __clock_cycles();
        Serial.printf("FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
    
     k++;
-  delay(20);
+  delay(0);
 
 }
