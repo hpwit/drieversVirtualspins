@@ -40,7 +40,7 @@ class DMABuffer
 			for (int i = 0; i < bytes*4; i++)
 				buffer[i] = 0;
         descriptor.length = bytes*4;//bytes
-        descriptor.size = descriptor.length/4;
+        descriptor.size = descriptor.length;
 		descriptor.owner = 1;
 		descriptor.sosf = 1;
 		descriptor.buf = (uint8_t *)buffer; //uint8_t

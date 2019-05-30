@@ -173,7 +173,7 @@ void displayPicNew(CRGB *pica, int x0, int y0, int h, int w)
     free(bitmapRGB);
     
 }
-CRGB bgColor=CRGB(10,10,10);
+CRGB bgColor=CRGB(0,0,0);
 CRGB lettrefont2[8*9];
 void afficheLettre2(int let,int x0,int y0)
 {
@@ -199,6 +199,189 @@ void afficheLettre2(int let,int x0,int y0)
     //Serial.printf("pic :%d %d\n",x0,y0);
     displayPicNew(lettrefont2,x0,y0,hauteur+1,taille);
     
+}
+
+
+CRGB  ghost[14][14] = {
+  {0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0},
+  {1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 3, 3, 1, 1},
+  {1, 1, 1, 3, 3, 2, 2, 1, 1, 3, 3, 2, 2, 1},
+  {0, 1, 1, 3, 3, 2, 2, 1, 1, 3, 3, 2, 2, 1},
+  {0, 1, 1, 3, 3, 3, 3, 1, 1, 3, 3, 3, 3, 1},
+  {0, 1, 1, 1, 3, 3, 1, 1, 1, 1, 3, 3, 1, 0},
+  {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
+  {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0},
+  {0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0}
+};
+CRGB ghostred[296];
+CRGB ghostyellow[296];
+CRGB ghostgreen[296];
+CRGB ghostPurple[296];
+CRGB ghostCyan[296];
+
+
+CRGB fraise[11][10] = {
+  {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+  {0, 0, 0, 1, 2, 1, 1, 0, 0, 0},
+  {0, 0, 1, 1, 1, 1, 2, 1, 0, 0},
+  {0, 1, 2, 1, 2, 1, 1, 1, 1, 0},
+  {0, 1, 1, 1, 1, 1, 1, 2, 1, 0},
+  {1, 1, 2, 1, 2, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 2, 1, 2, 1},
+  {1, 2, 1, 2, 1, 3, 1, 1, 1, 1},
+  {0, 1, 1, 1, 3, 3, 3, 1, 2, 0},
+  {0, 0, 3, 3, 3, 2, 3, 3, 3, 0},
+  {0, 0, 0, 0, 0, 2, 0, 0, 0, 0}
+};
+
+
+int YO = 0;
+
+int cerise[196] = {
+  100, 100, 100, 0, 0, 0, 0, 100, 100, 100, 100, 100, 100, 100,
+  100, 100, 0, 1, 1, 1, 1, 0, 100, 100, 100, 100, 100, 100,
+  100, 0, 1, 1, 2, 2, 1, 1, 0, 0, 0, 0, 100, 100,
+  100, 0, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 0, 100,
+  100, 0, 1, 1, 1, 1, 1, 1, 0, 2, 2, 1, 1, 0,
+  100, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 2, 1, 0,
+  100, 100, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0,
+  100, 100, 100, 0, 0, 3, 0, 1, 1, 1, 1, 1, 1, 0,
+  100, 100, 100, 0, 3, 0, 100, 0, 1, 1, 1, 1, 0, 100,
+  100, 100, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 100, 100,
+  100, 0, 0, 3, 0, 3, 3, 0, 100, 100, 100, 100, 100, 100,
+  0, 3, 3, 3, 3, 0, 0, 100, 100, 100, 100, 100, 100, 100,
+  0, 3, 3, 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+  100, 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
+};
+
+int mario[238]={
+   100,3,3,100,100,100,100,100,100,100,100,100,100,100,100,100,100,
+   100,3,3,3,2,2,2,2,2,2,100,100,100,100,100,100,100, 
+   100,100,3,3,2,2,2,2,2,2,2,2,2,2,3,3,100,
+   100,100,100,100,2,2,2,2,4,2,2,2,2,2,3,3,100,
+    100,5,5,1,1,1,1,2,2,2,2,4,2,2,3,3,100, 
+  5,5,1,1,1,1,1,2,1,1,1,2,100,100,3,3,100, 
+    5,5,1,1,1,1,2,1,1,1,2,1,1,100,100,3,100,
+  100,100,100,100,100,5,5,5,5,5,5,5,1,1,100,100,100,
+  100,100,100,3,3,5,5,5,5,6,6,6,6,1,100,100,100,
+  100,100,100,3,5,3,3,5,5,5,6,5,5,5,1,100,100,
+  100,100,100,3,5,3,5,5,5,6,5,5,5,1,1,100,100,
+  100,100,100,100,3,3,3,5,5,6,5,100,1,1,1,100,100, 
+  100,100,100,100,1,1,1,1,1,1,1,1,1,5,5,100,100,
+  100,100,100,100,100,1,1,1,1,1,100,100,5,5,5,100,100            
+};
+
+CRGB palec[4] = {CRGB::Black, CRGB::Red, CRGB::White, CRGB::Green};
+CRGB palpacman[2]={CRGB::Black,CRGB::Yellow};
+
+CRGB palm[7]={CRGB:: Red,CRGB::Red, CRGB::Blue,CRGB(98,65,7),CRGB::Yellow,CRGB(238,151,64),CRGB::Black};
+CRGB pall[7]={CRGB:: Red,CRGB::Green, CRGB::Blue,CRGB(98,65,7),CRGB::Yellow,CRGB(238,151,64),CRGB::Black};
+
+
+int ghostp[72]={
+  
+  1,9,9,9,1,9,9,9,1,
+    1,1,9,1,1,1,9,1,1,
+  1,1,1,1,1,1,1,1,1,
+  1,1,1,1,1,1,1,1,1,
+  1,3,2,1,1,3,2,1,1,
+  1,2,2,1,1,2,2,1,9,
+  9,1,1,1,1,1,1,1,9,
+  9,9,1,1,1,1,1,9,9,
+};
+CRGB ghostpc[72];
+
+CRGB palghost[4] = {CRGB::Black, CRGB::Red, CRGB::White, CRGB::Blue};
+
+
+
+void calculghosts(CRGB color)
+{
+  for (int m = 0; m < 14; m++)
+  {
+    for (int y = 0; y < 14; y++)
+    {
+      if (ghost[m][y] == (CRGB)1)
+      {
+        ghostred[m * 14 + y] = CRGB :: Red;
+        ghostyellow[m * 14 + y] = CRGB :: Yellow;
+        ghostgreen[m * 14 + y] = CRGB :: Green;
+        ghostPurple[m * 14 + y] = CRGB :: Purple;
+        ghostCyan[m * 14 + y] = CRGB(64, 222, 255);
+      }
+      if (ghost[m][y] == (CRGB)2)
+      {
+        ghostred[m * 14 + y] = CRGB :: Blue;
+        ghostyellow[m * 14 + y] = CRGB :: Blue;
+        ghostgreen[m * 14 + y] = CRGB :: Blue;
+        ghostPurple[m * 14 + y] = CRGB :: Blue;
+        ghostCyan[m * 14 + y] = CRGB :: Blue;
+      }
+
+      if (ghost[m][y] == (CRGB)3)
+      {
+        ghostred[m * 14 + y] = CRGB :: White;
+        ghostyellow[m * 14 + y] = CRGB :: White;
+        ghostgreen[m * 14 + y] = CRGB :: White;
+        ghostPurple[m * 14 + y] = CRGB :: White;
+        ghostCyan[m * 14 + y] = CRGB :: White;
+      }
+      if (ghost[m][y] == (CRGB)0)
+      {
+        ghostred[m * 14 + y] = color;
+        ghostyellow[m * 14 + y] = color;
+        ghostgreen[m * 14 + y] = color;
+        ghostPurple[m * 14 + y] = color;
+        ghostCyan[m * 14 + y] = color;
+      }
+
+    }
+  }
+}
+
+
+
+
+CRGB cerisecalc[196];
+
+CRGB mariocalc[238];
+CRGB luigicalc[238];
+CRGB fraiseCalc[110];
+void calculfraise(CRGB color)
+{
+  for (int m = 0; m < 11; m++)
+  {
+    for (int y = 0; y < 10; y++)
+    {
+      if (fraise[m][y] == (CRGB)1)
+      {
+        fraiseCalc[m * 10 + y] = CRGB :: Red;
+
+      }
+      if (fraise[m][y] == (CRGB)2)
+      {
+        fraiseCalc[m * 10 + y] = CRGB :: White;
+
+      }
+
+      if (fraise[m][y] == (CRGB)3)
+      {
+        fraiseCalc[m * 10 + y] = CRGB :: Green;
+
+      }
+      if (fraise[m][y] == (CRGB)0)
+      {
+        fraiseCalc[m * 10 + y] = color;
+
+      }
+
+    }
+  }
 }
 
 void displayPicNewInv(CRGB *pica, int x0, int y0, int h, int w)
@@ -468,6 +651,51 @@ void putOrientation2(CRGB *pic,int h,int w,int x0,int y0)
      //return Tpic;
     
 }
+
+
+void calculpic(int *pic, CRGB *palette, CRGB color, int h, int w,CRGB *result)
+{
+  Serial.println("on est là");
+  int to = h * w;
+ // static CRGB result[296];
+  /*for (int m = 0; m < h; m++)
+  {
+    for (int y = 0; y < w; y++)
+    {
+      result[m * w + y] = palette[pic[m * w + y]];
+      //Serial.print(palette[pic[m * w + y]]);
+      //Serial.printf(":%d\n", pic[m * w + y]);
+      if (pic[m * w + y] == 100)
+      {
+        result[m * w + y] = color;
+      }
+      if (pic[m * w + y] == 9)
+      {
+        result[m * w + y] = color;
+      }
+    }
+  }*/
+
+  for(int i=0;i<h*w;i++)
+  {
+    result[i] = palette[pic[i]];
+    if (pic[i] == 100)
+      {
+        result[i] = color;
+
+      }
+      if (pic[i] == 9)
+      {
+        result[i] = color;
+
+      }
+  }
+  
+ // return result;
+
+}
+
+
 void setup() {
   // put your setup code here, to run once:
      Serial.begin(115200);
@@ -486,7 +714,7 @@ controller.initled(leds,Pins,NUM_STRIPS,NUM_LEDS_PER_STRIP);
 
 fill_solid(leds,NUM_LEDS,CRGB::Black);
 //controller.showPixels();
-controller.setBrightness(255); //to be used instead of fastled.setbritg hness 
+controller.setBrightness(20); //to be used instead of fastled.setbritg hness 
 //delay(200);
  
        
@@ -516,6 +744,15 @@ controller.setBrightness(255); //to be used instead of fastled.setbritg hness
    // controller.showPixels();
     Serial.println("stop");
    // delay(2000);
+
+     CRGB solidColor=CRGB(0,0,0);
+  calculghosts(solidColor);
+  calculfraise(solidColor);
+  calculpic(cerise, palec, solidColor, 14, 14,cerisecalc);
+   calculpic(mario, palm, solidColor, 14, 17,mariocalc);
+     
+  calculpic(mario, pall, bgColor, 14, 17, luigicalc);
+bgColor=CRGB::Black;
 }
 
 
@@ -543,12 +780,21 @@ void loop() {
       }
     }*/
 char mess[40];
-
+int f=250;
+ int offset = LED_WIDTH;
 for(int i=0;i<NUM_STRIPS;i++)
 {
-  int y=LED_HEIGHT_PER_STRIP*i+2;
+  int y=LED_HEIGHT_PER_STRIP*i;
    sprintf(mess," LINE %d ",i+1);
-    afficheMessage2(mess,16-k%(7*12) ,y); //16-k%(7*16)
+     // displayPicDouble(cerisecalc, -k%f+ offset -20,cos_table[(int)(k/2)%LED_WIDTH], 14, 14);
+    displayPicNewInv(fraiseCalc, -k%f+ offset + 14 , y, 11, 10);
+    displayPicNewInv(ghostred, -k%f + offset + 30, y, 14, 14);
+    displayPicNewInv(ghostyellow, -k%f + offset +46, y, 14, 14);
+    displayPicNewInv(ghostgreen, -k%f + offset + 62, y, 14, 14);
+    displayPicNewInv(ghostPurple, -k%f + offset +78, y, 14, 14);
+    displayPicNewInv(ghostCyan, -k%f + offset + 94, y, 14, 14);
+displayPicNewInv(mariocalc, -k%f + offset+110 , y, 14, 17);
+    afficheMessage2(mess,-k%f+140 ,y); //16-k%(7*16)
 }
 
 long     lastHandle = __clock_cycles();
@@ -557,6 +803,6 @@ long     lastHandle = __clock_cycles();
        Serial.printf("FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
    
     k++;
-  delay(0);
+  delay(20);
 
 }
