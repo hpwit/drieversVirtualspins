@@ -714,7 +714,7 @@ controller.initled(leds,Pins,NUM_STRIPS,NUM_LEDS_PER_STRIP);
 
 fill_solid(leds,NUM_LEDS,CRGB::Black);
 //controller.showPixels();
-controller.setBrightness(20); //to be used instead of fastled.setbritg hness 
+controller.setBrightness(60); //to be used instead of fastled.setbritg hness 
 //delay(200);
  
        
@@ -782,6 +782,7 @@ void loop() {
 char mess[40];
 int f=250;
  int offset = LED_WIDTH;
+ long     lastHandle3 = __clock_cycles();
 for(int i=0;i<NUM_STRIPS;i++)
 {
   int y=LED_HEIGHT_PER_STRIP*i;
@@ -800,7 +801,9 @@ displayPicNewInv(mariocalc, -k%f + offset+110 , y, 14, 17);
 long     lastHandle = __clock_cycles();
    controller.showPixels();
  long   lasthandle2=__clock_cycles();
-       Serial.printf("FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
+  Serial.printf("FPS calcul: %f \n", (float) 240000000L/(lastHandle-lastHandle3));
+       Serial.printf("FPS fastled: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
+       Serial.printf("total FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle3));
    
     k++;
   delay(20);

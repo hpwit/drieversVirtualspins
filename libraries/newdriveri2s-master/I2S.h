@@ -39,8 +39,8 @@ class I2S
 	
 	  //CRGB  pixelg[8][5]; //volatile uint8_t pixelg[8][5];
 	   //uint8_t pixelg[16][8][4] ;
-	volatile uint8_t pixelr[8][5];
-	volatile uint8_t pixelb[8][5];
+	//volatile uint8_t pixelr[8][5];
+	//volatile uint8_t pixelb[8][5];
     int ledToDisplay;
 CRGB *leds;
   int dmaBufferCount=2; //we use two buffers
@@ -210,18 +210,14 @@ void setBrightness(uint8_t b)
 void fillbuffer6(uint32_t *buff)
 {
 	Lines firstPixel[3];
-        Lines secondPixel[3];
+       // Lines secondPixel[3];
 		int nblines=5;
-  int nbbits=8;
+ 
   int nbpins=16;
-  int lowerpins;
   
-  if(nbpins>8)
   
-  	lowerpins=8;
-	else
-	lowerpins=nbpins;
-	
+  
+	 uint32_t offset=(7)*18+10;
    for (int line=0;line<nblines;line++){
    uint32_t l=ledToDisplay+nun_led_per_strip*line;
         for(int pin=0;pin<nbpins;pin++) {
@@ -236,7 +232,16 @@ void fillbuffer6(uint32_t *buff)
 
 
 			}
-			 putPixelinBuffer2(firstPixel,buff,line);
+			 //putPixelinBuffer2(firstPixel,buff,line);
+			/* transpose16x1_noinline2(pixel[0].bytes,(uint8_t*)&buff[(7)*18+10-line]+1,18*4);
+        		transpose16x1_noinline2(pixel[1].bytes,(uint8_t*)&buff[(7+1*8)*18+10-line]+1,18*4);
+        		transpose16x1_noinline2(pixel[2].bytes,(uint8_t*)&buff[(7+2*8)*18+10-line]+1,18*4);*/
+			transpose16x1_noinline2(firstPixel[0].bytes,(uint8_t*)&buff[offset]+1,18*4);
+        		transpose16x1_noinline2(firstPixel[1].bytes,(uint8_t*)&buff[offset+8*18]+1,18*4);
+        		transpose16x1_noinline2(firstPixel[2].bytes,(uint8_t*)&buff[offset+16*18]+1,18*4);
+							
+				offset--;
+				
 		}
 }
 
@@ -245,14 +250,21 @@ void fillbuffer6(uint32_t *buff)
 
 	void   putPixelinBuffer2(Lines *pixel,uint32_t *buf,int line)
     {
-        Lines b2,b,b3,b4;
-        
+        //Lines b2,b,b3,b4;
+		//Lines b;
+		
+		transpose16x1_noinline2(pixel[0].bytes,(uint8_t*)&buf[(7)*18+10-line]+1,18*4);
+        transpose16x1_noinline2(pixel[1].bytes,(uint8_t*)&buf[(7+1*8)*18+10-line]+1,18*4);
+        transpose16x1_noinline2(pixel[2].bytes,(uint8_t*)&buf[(7+2*8)*18+10-line]+1,18*4);
+           
+       /*
         for (int color=0;color<3;color++)
         {
 			 b=pixel[color];         
 			transpose16x1_noinline2(b.bytes,(uint8_t*)&buf[(7+color*8)*18+10-line]+1,18*4);
            
         }
+		*/
     }
 
      void showPixels() {
