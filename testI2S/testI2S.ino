@@ -15,7 +15,7 @@
 #define UP_LEFT_INV      6
 #define UP_RIGHT_INV 7
 #define LED_WIDTH 16
-#define NUM_STRIPS 80
+#define NUM_STRIPS 100
 #define LED_HEIGHT_PER_STRIP 16
 #define NUM_LEDS_PER_STRIP LED_HEIGHT_PER_STRIP*LED_WIDTH
 #define LED_HEIGHT NUM_STRIPS*LED_HEIGHT_PER_STRIP
@@ -25,7 +25,7 @@
 #include "fontamstrad.h"
 int tableOrientation=DOWN_RIGHT_INV; //DOWN_RIGHT_INV;
     
-int Pins[24]={13,21,4,5,26,2,32,17,18,19,21,23,25,22,0,33,-1,-1,-1,-1,-1,-1,-1,12};
+int Pins[24]={13,21,4,5,26,2,32,17,18,19,21,23,25,22,0,-1,3,13,15,33,-1,-1,-1,12};
 
 CRGB leds[NUM_LEDS];
 CRGB Tpic[12];

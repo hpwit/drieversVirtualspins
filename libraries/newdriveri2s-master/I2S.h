@@ -44,9 +44,15 @@ class I2S
     int ledToDisplay;
 CRGB *leds;
   int dmaBufferCount=2; //we use two buffers
-    typedef union {
+   /* typedef union {
         uint8_t bytes[16];
         uint16_t shorts[8]; 
+        uint32_t raw[2];
+    } Lines;*/
+	
+	typedef union {
+        uint8_t bytes[20];
+        uint32_t shorts[8]; 
         uint32_t raw[2];
     } Lines;
   volatile  int num_strips;
@@ -141,7 +147,7 @@ void setBrightness(uint8_t b)
       {
       for (int i=0;i<5;i++)
 		{
-		 *buff=0xFFFF00;
+		 *buff=0xFFFFF00;
 		 buff++;
 		}
 		buff+=13;
@@ -205,7 +211,144 @@ void setBrightness(uint8_t b)
     
 }
 
+void transpose24x1_noinline(unsigned char *A, uint8_t *B,uint8_t offset) {
 
+    uint32_t  x, y, x1,y1,t,x2,y2;
+
+    
+
+    // Load the array and pack it into x and y.
+
+    /*  y = (*(unsigned char*)(A) & 0xffff ) |  ((*(unsigned char*)(A+4) & 0xffffL )<<16) ;
+
+     x = (*(unsigned char*)(A+8)& 0xffff ) |  ((*(unsigned char*)(A+12) & 0xffffL )<<16) ;
+
+     y1 = (*(unsigned char*)(A+2)& 0xffff ) |  ((*(unsigned char*)(A+6) & 0xffffL )<<16);
+
+     x1 = (*(unsigned char*)(A+10)& 0xffff )| ((*(unsigned char*)(A+14) & 0xffffL )<<16);*/
+
+    //printf("%d\n",*(unsigned int*)(A+4));
+
+    
+
+    
+
+    y = *(unsigned int*)(A);
+
+    x = *(unsigned int*)(A+4);
+
+    y1 = *(unsigned int*)(A+8);
+
+    x1 = *(unsigned int*)(A+12);
+
+    
+
+    y2 = *(unsigned int*)(A+16);
+
+    x2 = *(unsigned int*)(A+20);
+
+    
+
+    
+
+    // pre-transform x
+
+    t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+
+    t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
+
+    
+
+    t = (x1 ^ (x1 >> 7)) & 0x00AA00AA;  x1 = x1 ^ t ^ (t << 7);
+
+    t = (x1 ^ (x1 >>14)) & 0x0000CCCC;  x1 = x1 ^ t ^ (t <<14);
+
+    
+
+    t = (x2 ^ (x2 >> 7)) & 0x00AA00AA;  x2 = x2 ^ t ^ (t << 7);
+
+    t = (x2 ^ (x2 >>14)) & 0x0000CCCC;  x2 = x2 ^ t ^ (t <<14);
+
+    
+
+    // pre-transform y
+
+    t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+
+    t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
+
+    
+
+    t = (y1 ^ (y1 >> 7)) & 0x00AA00AA;  y1 = y1 ^ t ^ (t << 7);
+
+    t = (y1 ^ (y1 >>14)) & 0x0000CCCC;  y1 = y1 ^ t ^ (t <<14);
+
+    
+
+    t = (y2 ^ (y2 >> 7)) & 0x00AA00AA;  y2 = y2 ^ t ^ (t << 7);
+
+    t = (y2 ^ (y2 >>14)) & 0x0000CCCC;  y2 = y2 ^ t ^ (t <<14);
+
+    
+
+    // final transform
+
+    t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+
+    y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+
+    x = t;
+
+    
+
+    t = (x1 & 0xF0F0F0F0) | ((y1 >> 4) & 0x0F0F0F0F);
+
+    y1 = ((x1 << 4) & 0xF0F0F0F0) | (y1 & 0x0F0F0F0F);
+
+    x1 = t;
+
+    
+
+    t = (x2 & 0xF0F0F0F0) | ((y2 >> 4) & 0x0F0F0F0F);
+
+    y2 = ((x2 << 4) & 0xF0F0F0F0) | (y2 & 0x0F0F0F0F);
+
+    x2 = t;
+
+    
+
+    
+
+    
+
+    *((uint32_t*)B) = (uint32_t)(((y & 0xff) |  (  (y1 & 0xff) << 8 )  |  (  (y2 & 0xff) << 16 ))<<8 )&0xfffff00   ;
+	B-=offset;
+
+    *((uint32_t*)(B)) = (uint32_t)(((y & 0xff00) |((y1&0xff00) <<8)  |((y2&0xff00) <<16)  )<<8  )&0xfffff00;
+	B-=offset;
+
+    *((uint32_t*)(B)) =(uint32_t)((  (  (y & 0xff0000) >>16)|((y1&0xff0000) >>8)   |((y2&0xff0000))   )<<8  )&0xfffff00;
+	B-=offset;
+
+    *((uint32_t*)(B)) = (uint32_t)(((y & 0xff000000) >>16 |((y1&0xff000000)>>8 ) |((y2&0xff000000) )  ))&0xfffff00;
+	B-=offset;
+
+    
+
+    *((uint32_t*)B) =(uint32_t)(( (x & 0xff) |((x1&0xff) <<8)  |((x2&0xff) <<16))<<8 )&0xfffff00;
+	B-=offset;
+
+    *((uint32_t*)(B)) = (uint32_t)(((x & 0xff00) |((x1&0xff00) <<8)    |((x2&0xff00) <<16)    ))&0xfffff00;
+	B-=offset;
+
+    *((uint32_t*)(B)) = (uint32_t)( ( (  (x & 0xff0000) >>16)|((x1&0xff0000) >>8)   |((x2&0xff0000))   )<<8  )&0xfffff00;
+	B-=offset;
+
+    *((uint32_t*)(B)) = (uint32_t)(((x & 0xff000000) >>16 |((x1&0xff000000)>>8 )    |((x2&0xff000000) )    ))&0xfffff00;
+
+    
+
+}
 
 void fillbuffer6(uint32_t *buff)
 {
@@ -213,7 +356,7 @@ void fillbuffer6(uint32_t *buff)
        // Lines secondPixel[3];
 		int nblines=5;
  
-  int nbpins=16;
+  int nbpins=20;
   
   
   
@@ -236,10 +379,13 @@ void fillbuffer6(uint32_t *buff)
 			/* transpose16x1_noinline2(pixel[0].bytes,(uint8_t*)&buff[(7)*18+10-line]+1,18*4);
         		transpose16x1_noinline2(pixel[1].bytes,(uint8_t*)&buff[(7+1*8)*18+10-line]+1,18*4);
         		transpose16x1_noinline2(pixel[2].bytes,(uint8_t*)&buff[(7+2*8)*18+10-line]+1,18*4);*/
-			transpose16x1_noinline2(firstPixel[0].bytes,(uint8_t*)&buff[offset]+1,18*4);
+			/*transpose16x1_noinline2(firstPixel[0].bytes,(uint8_t*)&buff[offset]+1,18*4);
         		transpose16x1_noinline2(firstPixel[1].bytes,(uint8_t*)&buff[offset+8*18]+1,18*4);
         		transpose16x1_noinline2(firstPixel[2].bytes,(uint8_t*)&buff[offset+16*18]+1,18*4);
-							
+				*/
+			transpose24x1_noinline(firstPixel[0].bytes,(uint8_t*)&buff[offset],18*4);
+        		transpose24x1_noinline(firstPixel[1].bytes,(uint8_t*)&buff[offset+8*18],18*4);
+        		transpose24x1_noinline(firstPixel[2].bytes,(uint8_t*)&buff[offset+16*18],18*4);		
 				offset--;
 				
 		}
