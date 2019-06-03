@@ -24,7 +24,10 @@
 #include "rom/lldesc.h"
 #include "DMABuffer.h"
 #include "FastLed.h"
-
+#define NUM_VIRT_PINS 5
+#ifndef NBIS2SERIALPINS
+#define NBIS2SERIALPINS 1
+#endif
 
 class I2S
 {
@@ -32,6 +35,7 @@ class I2S
 	int i2sIndex;
 	intr_handle_t interruptHandle;
 	int nblinesperpin;
+	int nbpins;
 	int dmaBufferActive;
 	DMABuffer **dmaBuffers;
 	volatile bool stopSignal;
@@ -57,7 +61,7 @@ CRGB *leds;
     } Lines;
   volatile  int num_strips;
   volatile  int nun_led_per_strip;
-    int *Pins;
+   // int *Pins;
     int brigthness;
     int ledType;
 
@@ -69,21 +73,26 @@ void setBrightness(uint8_t b)
         this->brigthness=255/b;
     }
 
- void initled(CRGB *leds,int * Pins,int num_strips,int nun_led_per_strip,int ledType=1)
+ void initled(CRGB *leds,int *Pins,int nbpins,int latchpin,int clockpin,int num_strips,int nun_led_per_strip,int ledType=1)
     {
         //initialization of the pins
+		
+		
 		 Serial.println("init ready");
 		this->nblinesperpin=5;
         dmaBufferCount=4; //we need one more buffer for the pause ...
         this->leds=leds;
         this->nun_led_per_strip=nun_led_per_strip;
         this->num_strips=num_strips;
-        this->Pins=Pins;
+      //  this->Pins=Pins;
         this->brigthness=2;
         this->runningPixel=false;
         this->ledType=ledType;
+		this->nbpins=nbpins;
+		Serial.printf("%d %d %d %d\n",Pins[0],Pins[1],Pins[2],Pins[3]);
+		Serial.printf("nb pins %d %d %d\n",this->nbpins,sizeof(Pins),sizeof(*Pins));
         int pinMap[24];
-        for(int i=0;i<24;i++)
+        /*for(int i=0;i<24;i++)
         {
             if(i>=24)
             {
@@ -96,7 +105,7 @@ void setBrightness(uint8_t b)
                 else
                     pinMap[i]=-1;
             }
-        }
+        }*/
         
         this->dmaBufferCount=dmaBufferCount;
         this->dmaBuffers = (DMABuffer **)malloc(sizeof(DMABuffer *) * dmaBufferCount);
@@ -107,12 +116,12 @@ void setBrightness(uint8_t b)
         }
 		 Serial.println("init ready");
 		//return;
-        this->initParallelOutputMode(pinMap);
+        this->initParallelOutputMode(Pins,latchpin,clockpin);
         Serial.println("init ready");
 		//return;
         for (int i = 0; i < this->dmaBufferCount; i++)
         {
-            this->dmaBuffers[i] = DMABuffer::allocate((nblinesperpin+1)*3*8*3); //(5+1)*3 pulses*24 bits
+            this->dmaBuffers[i] = DMABuffer::allocate((NUM_VIRT_PINS+1)*3*8*3); //(5+1)*3 pulses*24 bits
            // if (i)
              //   this->dmaBuffers[i - 1]->next(this->dmaBuffers[i]);
            // pu((uint32_t*)this->dmaBuffers[i]->buffer); //we do get the buffer prefilled with the 0 at the end and the 1
@@ -132,10 +141,10 @@ void setBrightness(uint8_t b)
     
     void pu(uint32_t* buff)
     {
-	memset((uint8_t*)buff,0,18*8*3*4);
+	memset((uint8_t*)buff,0,(NUM_VIRT_PINS+1)*8*3*4);
 	for (int i=0;i<24*3;i++)
 		{
-		 buff[5+i*6]=0x80000000;
+		 buff[NUM_VIRT_PINS+i*(NUM_VIRT_PINS+1)]=0x80000000;
 		}
     }
 
@@ -145,12 +154,12 @@ void setBrightness(uint8_t b)
 	  
      for (int j=0;j<24;j++)
       {
-      for (int i=0;i<5;i++)
+      for (int i=0;i<NUM_VIRT_PINS;i++)
 		{
 		 *buff=0xFFFFF00;
 		 buff++;
 		}
-		buff+=13;
+		buff+=3*(NUM_VIRT_PINS+1)-NUM_VIRT_PINS; //13
       }
     }
 
@@ -356,14 +365,14 @@ void fillbuffer6(uint32_t *buff)
        // Lines secondPixel[3];
 		int nblines=5;
  
-  int nbpins=20;
+  int nbpins=20;//	this->nbpins;
   
   
   
-	 uint32_t offset=(7)*18+10;
-   for (int line=0;line<nblines;line++){
+	 uint32_t offset=(7)*(NUM_VIRT_PINS+1)*3+2*NUM_VIRT_PINS;
+   for (int line=0;line<NUM_VIRT_PINS;line++){
    uint32_t l=ledToDisplay+nun_led_per_strip*line;
-        for(int pin=0;pin<nbpins;pin++) {
+        for(int pin=0;pin<NBIS2SERIALPINS;pin++) {
 
 	//uint32_t l=ledToDisplay+nun_led_per_strip*line+pin*nun_led_per_strip*5;
  
@@ -371,7 +380,7 @@ void fillbuffer6(uint32_t *buff)
 			firstPixel[0].bytes[pin] = leds[l].g/brigthness;
             firstPixel[1].bytes[pin] = leds[l].r/brigthness;
             firstPixel[2].bytes[pin] = leds[l].b/brigthness;
-			l+=nun_led_per_strip*5;
+			l+=nun_led_per_strip*NUM_VIRT_PINS;
 
 
 			}
@@ -383,9 +392,9 @@ void fillbuffer6(uint32_t *buff)
         		transpose16x1_noinline2(firstPixel[1].bytes,(uint8_t*)&buff[offset+8*18]+1,18*4);
         		transpose16x1_noinline2(firstPixel[2].bytes,(uint8_t*)&buff[offset+16*18]+1,18*4);
 				*/
-			transpose24x1_noinline(firstPixel[0].bytes,(uint8_t*)&buff[offset],18*4);
-        		transpose24x1_noinline(firstPixel[1].bytes,(uint8_t*)&buff[offset+8*18],18*4);
-        		transpose24x1_noinline(firstPixel[2].bytes,(uint8_t*)&buff[offset+16*18],18*4);		
+			transpose24x1_noinline(firstPixel[0].bytes,(uint8_t*)&buff[offset],(NUM_VIRT_PINS+1)*3*4);
+        		transpose24x1_noinline(firstPixel[1].bytes,(uint8_t*)&buff[offset+8*(NUM_VIRT_PINS+1)*3],(NUM_VIRT_PINS+1)*3*4);
+        		transpose24x1_noinline(firstPixel[2].bytes,(uint8_t*)&buff[offset+16*(NUM_VIRT_PINS+1)*3],(NUM_VIRT_PINS+1)*3*4);		
 				offset--;
 				
 		}
@@ -500,7 +509,7 @@ void fillbuffer6(uint32_t *buff)
   
 	void resetDMA();
 	void resetFIFO();
-	bool initParallelOutputMode(const int *pinMap, long APLLFreq = 100000, int baseClock = -1, int wordSelect = -1);
+	bool initParallelOutputMode(const int *pinMap, int latchpin,int clockpin,long APLLFreq = 100000, int baseClock = -1, int wordSelect = -1);
 	bool initParallelInputMode(const int *pinMap, long sampleRate = 100000, int baseClock = -1, int wordSelect = -1);
 
 	void allocateDMABuffers(int count, int bytes);

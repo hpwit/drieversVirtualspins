@@ -156,7 +156,7 @@ void I2S::resetFIFO()
 
 
 
-bool I2S::initParallelOutputMode(const int *pinMap, long sampleRate, int baseClock, int wordSelect)
+bool I2S::initParallelOutputMode(const int *pinMap, int latchpin,int clockpin,long sampleRate, int baseClock, int wordSelect)
 {
 	volatile i2s_dev_t &i2s = *i2sDevices[i2sIndex];
     Serial.println("in d");
@@ -167,7 +167,8 @@ bool I2S::initParallelOutputMode(const int *pinMap, long sampleRate, int baseClo
 	const int deviceWordSelectIndex[] = {I2S0O_WS_OUT_IDX, I2S1O_WS_OUT_IDX};
 	const periph_module_t deviceModule[] = {PERIPH_I2S0_MODULE, PERIPH_I2S1_MODULE};
 	//works only since indices of the pads are sequential
-	for (int i = 0; i < 24; i++)
+	Serial.println(this->nbpins);
+	for (int i = 0; i < this->nbpins; i++)
 		if (pinMap[i] > -1)
 		{
 			PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pinMap[i]], PIN_FUNC_GPIO);
@@ -175,8 +176,15 @@ bool I2S::initParallelOutputMode(const int *pinMap, long sampleRate, int baseClo
      pinMode(pinMap[i],OUTPUT);
 			gpio_matrix_out(pinMap[i], deviceBaseIndex[i2sIndex] + i, false, false);
 		}
+		
+		//latch pin
+		PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[latchpin], PIN_FUNC_GPIO);
+			gpio_set_direction((gpio_num_t)latchpin, (gpio_mode_t)GPIO_MODE_DEF_OUTPUT);
+     pinMode(latchpin,OUTPUT);
+			gpio_matrix_out(latchpin, deviceBaseIndex[i2sIndex] + 23, false, false);
 	//if (baseClock > -1)
-		gpio_matrix_out(27, deviceClockIndex[i2sIndex], false, false);
+	//clock pin
+		gpio_matrix_out(clockpin, deviceClockIndex[i2sIndex], false, false);
 	if (wordSelect > -1)
 		gpio_matrix_out(wordSelect, deviceWordSelectIndex[i2sIndex], false, false);
 Serial.println("in d1");
@@ -303,8 +311,9 @@ Serial.println("in d4");
     Serial.println((sdm >> 8) & 255);
     Serial.println((sdm >> 16)&63);
 	//rtc_clk_apll_enable(true, 0, 0,6, 1);
-	rtc_clk_apll_enable(true, 215, 163,4, 1); //14.4Mhz 5pins + 1 latch
-	//rtc_clk_apll_enable(true, 123, 20,6, 1); //16.8Mhz 6 pins +1 latch
+	rtc_clk_apll_enable(true, 215, 163,4, 1); //14.4Mhz 5pins + 1 la
+	//rtc_clk_apll_enable(true, 123, 20,6, 1); //16.8Mhz 6 pins +1 latchtch
+	//rtc_clk_apll_enable(true, 0, 0,6, 1); //16.8Mhz 6 pins +1 latch
 	//rtc_clk_apll_enable(true, 31, 133,7, 1); //19.2Mhz 7 pins +1 latch
 	//rtc_clk_apll_enable(true, 195, 245,8, 1); //21.6 Mhz 8 pins +1 latch
 	

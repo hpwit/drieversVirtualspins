@@ -21,11 +21,12 @@
 #define LED_HEIGHT NUM_STRIPS*LED_HEIGHT_PER_STRIP
  //up to 22
 #define NUM_LEDS NUM_STRIPS * NUM_LEDS_PER_STRIP
+#define NBIS2SERIALPINS 20
 #include "I2S.h"
 #include "fontamstrad.h"
 int tableOrientation=DOWN_RIGHT_INV; //DOWN_RIGHT_INV;
     
-int Pins[24]={13,21,4,5,26,2,32,17,18,19,21,23,25,22,0,-1,3,13,15,33,-1,-1,-1,12};
+int Pins[20]={13,21,4,5,26,2,32,17,18,19,21,23,25,22,0,-1,3,13,15,33};//,-1,-1,-1,12};
 
 CRGB leds[NUM_LEDS];
 CRGB Tpic[12];
@@ -187,7 +188,7 @@ void afficheLettre2(int let,int x0,int y0)
         {
             if ( ( (1 << (x0-x+taille-1)) &   fontamstrad[let][hauteur-1 - y + y0] ) > 0 )
             {
-                lettrefont2[(x-x0)+(y-y0)*taille]=CRGB(64,0,64);//CRGB::Blue;
+                lettrefont2[(x-x0)+(y-y0)*taille]=CRGB(255,0,255);//CRGB::Blue;
             }
             else
             {
@@ -708,10 +709,11 @@ Serial.printf("%d:%d:%d %d\n",d[0],d[1],d[2],(uint32_t)*f);
 //Serial.printf("%d:%d:%d\n",l.g,l.r,l.b);
   
  Serial.println("init ready");
-controller.initled(leds,Pins,NUM_STRIPS,NUM_LEDS_PER_STRIP);
+ Serial.printf("nb pins %d %d %d\n",1,sizeof(Pins),sizeof(*Pins));
+controller.initled(leds,Pins,sizeof(Pins)/sizeof(*Pins),12,27,NUM_STRIPS,NUM_LEDS_PER_STRIP);
 
 //controller.initled(leds,Pins,NUM_STRIPS,NUM_LEDS_PER_STRIP,0); more suitable for ws2811
-
+Serial.printf("nb pins %d %d %d\n",1,sizeof(Pins),sizeof(*Pins));
 fill_solid(leds,NUM_LEDS,CRGB::Black);
 //controller.showPixels();
 controller.setBrightness(60); //to be used instead of fastled.setbritg hness 
@@ -801,11 +803,11 @@ displayPicNewInv(mariocalc, -k%f + offset+110 , y, 14, 17);
 long     lastHandle = __clock_cycles();
    controller.showPixels();
  long   lasthandle2=__clock_cycles();
-  Serial.printf("FPS calcul: %f \n", (float) 240000000L/(lastHandle-lastHandle3));
+ // Serial.printf("FPS calcul: %f \n", (float) 240000000L/(lastHandle-lastHandle3));
        Serial.printf("FPS fastled: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
-       Serial.printf("total FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle3));
+     //  Serial.printf("total FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle3));
    
     k++;
-  delay(20);
+  delay(10);
 
 }
