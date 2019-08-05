@@ -1,0 +1,134 @@
+ <html>
+<head>
+<meta name = "viewport" content = "width = device-width, initial-scale = 1, maximum-scale = 1, user-scalable=no"/>
+<title>TETRIS</title>
+
+ <link rel="stylesheet" href="images.css" type="text/css" />
+
+ <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+var websock;
+function start() {
+
+  websock = new WebSocket('ws://'+ window.location.hostname +':86/');
+  websock.onopen = function(evt) { console.log('websock open'); };
+  websock.onclose = function(evt) { console.log('websock close'); };
+  websock.onerror = function(evt) { console.log(evt); };
+  
+}
+
+	
+	function _addEventListener(evt, element, fn) {
+  if (window.addEventListener) {
+    element.addEventListener(evt, fn, false);
+  }
+  else {
+    element.attachEvent('on'+evt, fn);
+  }
+}
+var Key = {
+  LEFT:   37,
+  UP:     38,
+  RIGHT:  39,
+  DOWN:   40
+};
+function handleKeyboardEvent(evt) {
+  if (!evt) {evt = window.event;} // for old IE compatible
+  var keycode = evt.keyCode || evt.which; // also for cross-browser compatible
+
+  var info = "";
+  switch (keycode) {
+    case Key.LEFT:
+      info= "LEFT";
+      break;
+    case Key.UP:
+      info= "UP";
+      break;
+    case Key.RIGHT:
+      info= "RIGHT";
+      break;
+    case Key.DOWN:
+      info= "DOWN";
+      break;
+    default:
+      info= "";
+  }
+	if (info!="")
+		{
+			websock.send(info);
+		}
+}
+
+_addEventListener('keydown', document, handleKeyboardEvent);
+</script>
+</head>
+<body onload="javascript:start();">
+	<center><h1>SNAKE</h1></center>
+
+<table width="100%">
+<tr>
+<td align=	"left">
+	<div id="b1" class="lefts"></div>
+	</td>
+<td align="right">
+	<div id="br" class="rights"></div>
+	</td>	
+	</tr>
+	<tr>
+	<td align="left">
+		<div  id="tul" class="up">UP</div>
+</td>
+<td align="right">
+	<div  id="tur" class="down">DOWN</div>
+</td>
+</tr>
+<tr>
+<td align="center" width="100%"></td>	
+</tr>
+</table>
+<button id="new" >NEW PARTY</button>
+<a href="index.html" >main menu</a>
+<script>
+$("#b1").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("LEFT");
+});	
+	$("#tul").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("UP");
+});	
+	
+		$("#tur").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("DOWN");
+});	
+$("#br").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("RIGHT");
+});		
+	
+$("#de").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("descend");
+});		
+	
+$("#new").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("new");
+});		
+	
+</script>
+</body>
+</html>

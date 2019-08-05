@@ -1,0 +1,262 @@
+ <html>
+<head>
+<meta name = "viewport" content = "width = device-width, initial-scale = 1, maximum-scale = 1, user-scalable=no"/>
+<title>PAINT</title>
+
+ <link rel="stylesheet" href="images.css" type="text/css" />
+
+ <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script type="text/javascript" src="farbtastic.js"></script>
+ <link rel="stylesheet" href="farbtastic.css" type="text/css" />
+ <style type="text/css" media="screen">
+   .colorwell {
+     border: 2px solid #fff;
+     width: 6em;
+     text-align: center;
+     cursor: pointer;
+   }
+   body .colorwell-selected {
+     border: 2px solid #000;
+     font-weight: bold;
+	   
+   }
+    #canvas {
+      border:solid black 1px;
+    }
+	</style>
+<script>
+var websock;
+
+	
+	var offset=7;
+	
+	   var ongoingTouches = new Array;
+    
+		function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+		}
+	
+    function colorForTouch(touch) {
+      var id = touch.identifier;
+      id = id.toString(16); // make it a hex digit
+      return "#" + id + id + id;
+    }
+    
+    function ongoingTouchIndexById(idToFind) {
+      for (var i=0; i<ongoingTouches.length; i++) {
+        var id = ongoingTouches[i].identifier;
+        
+        if (id == idToFind) {
+          return i;
+        }
+      }
+      return -1;    // not found
+    }
+    
+    function handleStart(evt) {
+      evt.preventDefault();
+      var el = document.getElementById("canvas");
+      var ctx = el.getContext("2d");
+      var touches = evt.changedTouches;
+            
+      for (var i=0; i<touches.length; i++) {
+        ongoingTouches.push(touches[i]);
+		rgb=hexToRgb($("#color").val());
+		  websock.send("paint "+(touches[i].pageX-el.clientLeft-offset)+" "+(48-touches[i].pageY+el.clientTop+offset)+" "+rgb.r+" "+rgb.b+" "+rgb.g);
+        //var color = colorForTouch(touches[i]);
+        ctx.fillStyle =   $("#color").val();
+		  ctx.fillText=$("#color").val();
+        ctx.fillRect(touches[i].pageX-el.clientLeft-offset, touches[i].pageY-el.clientTop-offset, 1, 1);
+		  //ctx.stroke();
+      }
+				
+	}
+  
+    function handleMove(evt) {
+      evt.preventDefault();
+      var el = document.getElementById("canvas");
+      var ctx = el.getContext("2d");
+      var touches = evt.changedTouches;
+      
+      ctx.lineWidth = 1;
+            
+      for (var i=0; i<touches.length; i++) {
+        var color = colorForTouch(touches[i]);
+        var idx = ongoingTouchIndexById(touches[i].identifier);
+
+        ctx.strokeStyle =   $("#color").val();//color;
+        ctx.beginPath();
+        ctx.moveTo(ongoingTouches[idx].pageX-el.clientLeft-offset, ongoingTouches[idx].pageY-el.clientTop-offset);
+        ctx.lineTo(touches[i].pageX-offset, touches[i].pageY-offset);
+        ctx.closePath();
+        ctx.stroke();
+		  rgb=hexToRgb($("#color").val());
+		  websock.send("line "+(touches[i].pageX-el.clientLeft-offset)+" "+(48-touches[i].pageY+el.clientTop+offset)+" "+(ongoingTouches[idx].pageX-el.clientLeft-offset)+" "+(48-ongoingTouches[idx].pageY+el.clientTop+offset)+" "+rgb.r+" "+rgb.b+" "+rgb.g);
+		  //alert("paint "+touches[i].pageX+" "+touches[i].pageY+" "+rgb.r+" "+rgb.b+" "+rgb.g);
+        ongoingTouches.splice(idx, 1, touches[i]); 
+		  
+        //var color = colorForTouch(touches[i]);// swap in the new touch record
+      }
+    }
+
+    function handleEnd(evt) {
+      evt.preventDefault();
+      var el = document.getElementById("canvas");
+      var ctx = el.getContext("2d");
+      var touches = evt.changedTouches;
+      
+      ctx.lineWidth = 1;
+            
+      for (var i=0; i<touches.length; i++) {
+        var color = colorForTouch(touches[i]);
+        var idx = ongoingTouchIndexById(touches[i].identifier);
+        
+        ctx.fillStyle = $("#color").val();;
+       // ctx.beginPath();
+        //ctx.moveTo(ongoingTouches[i].pageX, ongoingTouches[i].pageY);
+       // ctx.lineTo(touches[i].pageX, touches[i].pageY);
+        ongoingTouches.splice(i, 1);  // remove it; we're done
+      }
+    }
+    
+    function handleCancel(evt) {
+      evt.preventDefault();
+      var touches = evt.changedTouches;
+      
+      for (var i=0; i<touches.length; i++) {
+        ongoingTouches.splice(i, 1);  // remove it; we're done
+      }
+    }
+
+  
+    function startup() {
+      var el = document.getElementById("canvas");
+      el.addEventListener("touchstart", handleStart, false);
+      el.addEventListener("touchend", handleEnd, false);
+      el.addEventListener("touchcancel", handleCancel, false);
+      el.addEventListener("touchleave", handleEnd, false);
+      el.addEventListener("touchmove", handleMove, false);
+		
+
+  websock = new WebSocket('ws://'+ window.location.hostname + ':82/');
+  websock.onopen = function(evt) { console.log('websock open'); };
+  websock.onclose = function(evt) { console.log('websock close'); };
+  websock.onerror = function(evt) { console.log(evt); };
+  
+
+    }
+
+</script>
+</head>
+<body onload="javascript:startup();"> 
+
+ <canvas id="canvas" width="122" height="48">
+    You really badly need to use a different browser.
+  </canvas>
+
+	<center><h1>PAINT</h1></center>
+	
+	<table>
+<tr><td>
+<table id="table" boder="0px">
+
+	
+</table></td><td>
+<form action="" style="width: 400px;">
+  <div class="form-item"><label for="color">Color:</label><input type="text" id="color" name="color" value="#123456" /></div><div id="picker"></div>
+</form>
+	</td></tr>
+	</table>
+
+
+<button id="new" >ERASE</button><button id="stop" >STOP</button>
+
+<script>
+function creategrid(x,y)
+	{
+		for(j=0;j<y;j++)
+			{
+		var $newtr=$("<tr></tr>");
+		for(i=0;i<x;i++)
+			{
+				var $newtd=$("<td class='row' ></td>");
+				var $newcase=$('<div class="case"></div>');
+				$newcase.attr("x",x-1-i).attr("y",y-1-j);
+				$newtd.append($newcase);
+				$newtr.append($newtd);
+	//			<tr>
+//<td ><div class="case" x="2" y="3" >qsd</div> </td>	
+//<td ><div class="case" x="3" y="4" >qsds</div> </td>	
+//</tr>
+			}
+		$("#table").append($newtr);
+			}
+		//alert($("#table").html());
+	}
+	
+	
+
+
+	
+$("#new").click(function(){
+
+	//$("div.case").css("background-color","#000000");
+	
+	var el = document.getElementById("canvas");
+      var ctx = el.getContext("2d");
+	//ctx.strokeStyle =  "#000000";
+	ctx.fillStyle="#000000";
+        ctx.fillRect(0,0, el.width, el.height);
+	//ctx.stroke();
+	websock.send("new");
+});		
+	
+$("#stop").click(function(){
+	
+	websock.send("stop");
+});	
+$( document ).ready(function(){
+	
+		//creategrid(30,20);	//Here you decice the size of the grid for you 128*32
+//	$("div.case").click(function(){
+//		rgb=hexToRgb($("#color").val());
+	//alert($(this).attr("x")+":"+$(this).attr("y"));
+//	$(this).css("background-color",$("#color").val());
+//		websock.send("paint "+$(this).attr("x")+" "+$(this).attr("y")+" "+rgb.r+" "+rgb.b+" "+rgb.g);
+		
+		
+		
+//});	
+	    $('#picker').farbtastic('#color');
+		var el = document.getElementById("canvas");
+      var ctx = el.getContext("2d");
+	ctx.strokeStyle =  "#000000";
+	ctx.fillStyle="#000000";
+        ctx.fillRect(0,0, el.width, el.height);
+	//ctx.stroke();
+		  
+//  });
+	
+	/*
+	function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+	*/
+				   
+} );
+					
+					
+					
+</script>
+</body>
+</html>

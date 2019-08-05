@@ -177,7 +177,7 @@ uint16_t Artnet::read()
         //sequence = artnetPacket[12];
         incomingUniverse = artnetPacket[14] | (artnetPacket[15] << 8);
         dmxDataLength = artnetPacket[17] | artnetPacket[16] << 8;
-        Serial.printf("receiving packet n:%d",incomingUniverse);
+      //Serial.printf("receiving packet n:%d\n",incomingUniverse);
           if(nbPixelsPerUniverse*(incomingUniverse)*3<=nbPixels*3)
           {
              if(dmxDataLength>nbPixelsPerUniverse*3)
@@ -185,10 +185,10 @@ uint16_t Artnet::read()
                  dmxDataLength= nbPixelsPerUniverse*3;
                 }
               timef=millis();
-               memcpy(&artnetleds1[nbPixelsPerUniverse*(incomingUniverse)*3+currentframenumber*nbPixels*3],artnetPacket + ART_DMX_START,dmxDataLength);
+        //      memcpy(&artnetleds1[nbPixelsPerUniverse*(incomingUniverse)*3+currentframenumber*nbPixels*3],artnetPacket + ART_DMX_START,dmxDataLength);
               if(incomingUniverse==0)
               {
-                  Serial.println("new frame");
+                 // Serial.println("new frame");
                   if((sync |sync2))
                       lostframes++;
                   sync=1;

@@ -1,0 +1,91 @@
+ <html>
+<head>
+<meta name = "viewport" content = "width = device-width, initial-scale = 1, maximum-scale = 1, user-scalable=no"/>
+<title>TETRIS</title>
+
+ <link rel="stylesheet" href="images.css" type="text/css" />
+
+ <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+var websock;
+function start() {
+
+  websock = new WebSocket('ws://'+ window.location.hostname + ':85/');
+  websock.onopen = function(evt) { console.log('websock open'); };
+  websock.onclose = function(evt) { console.log('websock close'); };
+  websock.onerror = function(evt) { console.log(evt); };
+  
+}
+
+</script>
+</head>
+<body onload="javascript:start();">
+	<center><h1>TETRIS</h1></center>
+
+<table width="100%">
+<tr>
+<td align=	"left">
+	<div id="b1" class="lefts"></div>
+	</td>
+<td align="right">
+	<div id="br" class="rights"></div>
+	</td>	
+	</tr>
+	<tr>
+	<td align="left">
+	<div  id="tul" class="tlefts"/>
+</td>
+<td align="right">
+	<div  id="tur" class="trights">
+</td>
+</tr>
+<tr>
+<td align="center" width="100%"><button id="de" style="width:100px;height: 100px">Down</button></td>	
+</tr>
+</table>
+<button id="new" >NEW PARTY</button>
+<a href="index.html" >main menu</a>
+<script>
+$("#b1").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("left1");
+});	
+	$("#tul").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("turnl1");
+});	
+	
+		$("#tur").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("turnr1");
+});	
+$("#br").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("right1");
+});		
+	
+$("#de").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("descend1");
+});		
+	
+$("#new").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+//$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+	websock.send("new");
+});		
+	
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+#######################################
+# Syntax Coloring Map LoRaNode
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+node	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+onReceive	KEYWORD2
+begin	KEYWORD2
+joinOTAA	KEYWORD2
+joinABP	KEYWORD2
+sendFrame	KEYWORD2
+poll	KEYWORD2
+showStatus	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

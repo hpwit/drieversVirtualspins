@@ -313,6 +313,8 @@ Serial.println("in d4");
 	//rtc_clk_apll_enable(true, 0, 0,6, 1);
 	rtc_clk_apll_enable(true, 215, 163,4, 1); //14.4Mhz 5pins + 1 la
 	//rtc_clk_apll_enable(true, 123, 20,6, 1); //16.8Mhz 6 pins +1 latchtch
+	//rtc_clk_apll_enable(true, 164, 112,9, 2); //16.8Mhz 6 pins +1 latchtch
+	//rtc_clk_apll_enable(true, 0,255,10, 3);
 	//rtc_clk_apll_enable(true, 0, 0,6, 1); //16.8Mhz 6 pins +1 latch
 	//rtc_clk_apll_enable(true, 31, 133,7, 1); //19.2Mhz 7 pins +1 latch
 	//rtc_clk_apll_enable(true, 195, 245,8, 1); //21.6 Mhz 8 pins +1 latch

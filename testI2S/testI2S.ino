@@ -15,21 +15,62 @@
 #define UP_LEFT_INV      6
 #define UP_RIGHT_INV 7
 #define LED_WIDTH 16
-#define NUM_STRIPS 100
+#define NUM_STRIPS 20
 #define LED_HEIGHT_PER_STRIP 16
 #define NUM_LEDS_PER_STRIP LED_HEIGHT_PER_STRIP*LED_WIDTH
 #define LED_HEIGHT NUM_STRIPS*LED_HEIGHT_PER_STRIP
  //up to 22
 #define NUM_LEDS NUM_STRIPS * NUM_LEDS_PER_STRIP
-#define NBIS2SERIALPINS 20
+#define NBIS2SERIALPINS 4
 #include "I2S.h"
 #include "fontamstrad.h"
-int tableOrientation=DOWN_RIGHT_INV; //DOWN_RIGHT_INV;
-    
-int Pins[20]={13,21,4,5,26,2,32,17,18,19,21,23,25,22,0,-1,3,13,15,33};//,-1,-1,-1,12};
-
+CRGB solidColor = CRGB(0, 0, 0);
+CRGB bgColor = CRGB(10,10,10);
+CRGB Color = CRGB :: Blue;
 CRGB leds[NUM_LEDS];
-CRGB Tpic[12];
+CRGB Tpic[NUM_LEDS];
+
+void PixelOn(int x,int y,CRGB Color)
+{
+    //int offset=0;
+    if (x<0 or y<0 or x>=LED_WIDTH or y>=LED_HEIGHT)
+        return ;
+    if(y%2==0)
+        leds[x+y*LED_WIDTH]=Color;
+    else
+    {
+        //int offset2=2 * LED_WIDTH * ((int)floor(y /2)  + 1) - 1 - x;
+        leds[(LED_WIDTH<<1) * ((y >>1)  + 1) - 1 - x]=Color;
+        // leds[LED_WIDTH*y+(LED_WIDTH<<1)-1-x]=Color;
+        
+    }
+    
+    // leds[ (y%2==0) ? x+y*LED_WIDTH : (LED_WIDTH<<1) * ((y >>1)  + 1) - 1 - x]=Color;
+    //leds[offset]=Color;
+    
+}
+
+ CRGB getPixelValue(int x, int y)
+{
+  if (x<0 or y<0 or x>=LED_WIDTH or y>=LED_HEIGHT)
+        return CRGB(0,0,0);
+    if(y%2==0)
+        return leds[x+y*LED_WIDTH];
+    else
+    {
+        //int offset2=2 * LED_WIDTH * ((int)floor(y /2)  + 1) - 1 - x;
+       return leds[(LED_WIDTH<<1) * ((y >>1)  + 1) - 1 - x];
+        // leds[LED_WIDTH*y+(LED_WIDTH<<1)-1-x]=Color;
+        
+    }
+}
+
+
+#include "graphicfunction.h"
+int tableOrientation=DOWN_RIGHT_INV;
+    
+int Pins[4]={14,4,5,15};//,-1,-1,-1,-1,18,19,21,23,25,22,0,-1,3,16,15,33};//,-1,-1,-1,12};
+
 I2S controller(0);
 
 
@@ -174,7 +215,7 @@ void displayPicNew(CRGB *pica, int x0, int y0, int h, int w)
     free(bitmapRGB);
     
 }
-CRGB bgColor=CRGB(0,0,0);
+//CRGB bgColor=CRGB(0,0,0);
 CRGB lettrefont2[8*9];
 void afficheLettre2(int let,int x0,int y0)
 {
@@ -710,7 +751,7 @@ Serial.printf("%d:%d:%d %d\n",d[0],d[1],d[2],(uint32_t)*f);
   
  Serial.println("init ready");
  Serial.printf("nb pins %d %d %d\n",1,sizeof(Pins),sizeof(*Pins));
-controller.initled(leds,Pins,sizeof(Pins)/sizeof(*Pins),12,27,NUM_STRIPS,NUM_LEDS_PER_STRIP);
+controller.initled(leds,Pins,4,12,27,NUM_STRIPS,NUM_LEDS_PER_STRIP);
 
 //controller.initled(leds,Pins,NUM_STRIPS,NUM_LEDS_PER_STRIP,0); more suitable for ws2811
 Serial.printf("nb pins %d %d %d\n",1,sizeof(Pins),sizeof(*Pins));
@@ -758,17 +799,73 @@ bgColor=CRGB::Black;
 }
 
 
-   
+  void exchange(int a,int b)
+  {
+    //exchange 1 et 7
+    for(int i=0;i<NUM_LEDS_PER_STRIP;i++)
+    {
+      CRGB k=leds[a*NUM_LEDS_PER_STRIP+i];
+      leds[a*NUM_LEDS_PER_STRIP+i]=leds[b*NUM_LEDS_PER_STRIP+i];
+      leds[b*NUM_LEDS_PER_STRIP+i]=k;
+      
+    }
+  }
+  
+void replaceled()
+{
+ // return;
+  int offset=0;
+  for(int i=0;i<123;i++)
+ {
+   byte s=leds[i+offset].g;
+  // char buff[9];
+   // my_itoa (s,buff,16,8);
+    //Serial.println(buff);
+   leds[i+offset].g= leds[i+offset].r;
+   leds[i+offset].r= s;
+   //CRGB((s&0x0F000)>>8,(s&0x00FF0000)>>16 ,s & 0xFF) ;  //(leds[i+offset] & 0xFF) |  ( (leds[i+offset] & 0x00FF00L)<<8   ) |  (  (leds[i+offset] & 0xFF0000L)>>8  );
+ }
+ offset=24*LED_WIDTH;
+  for(int i=0;i<24*LED_WIDTH;i++)
+ {
+   byte s=leds[i+offset].g;
+  // char buff[9];
+   // my_itoa (s,buff,16,8);
+    //Serial.println(buff);
+   leds[i+offset].g= leds[i+offset].r;
+   leds[i+offset].r= s; 
+   //CRGB((s&0x0F000)>>8,(s&0x00FF0000)>>16 ,s & 0xFF) ;  //(leds[i+offset] & 0xFF) |  ( (leds[i+offset] & 0x00FF00L)<<8   ) |  (  (leds[i+offset] & 0xFF0000L)>>8  );
+ }
+ //on met les boards en noir
 
+ for (int i=0;i<LED_HEIGHT;i++)
+ {
+  leds[i*LED_WIDTH]=CRGB::Black;
+  leds[(i+1)*LED_WIDTH-1]=CRGB::Black;
+ }
+}
+
+void trun()
+{
+  exchange(0,6);
+  exchange(2,4);
+  exchange(8,14);
+  exchange(10,12);
+//  exchange(1,7);
+ // exchange(3,5);
+  
+}
  
 int k=0;
+ int  dire=1;
+  int r=1;
 void loop() {
  /*controller.dmaBufferActive=0;
  controller.stopSignal=false;
         controller.startTX();
  */
 
- fill_solid(leds,NUM_LEDS,CRGB(0,0,0));
+ fill_solid(leds,NUM_LEDS,CRGB(10,10,10));
  uint16_t i=0;
 /*
  for(uint16_t pin=0;pin<8;pin++)
@@ -781,6 +878,8 @@ void loop() {
        // leds[(k+1)%NUM_LEDS_PER_STRIP+NUM_LEDS_PER_STRIP*line+pin*NUM_LEDS_PER_STRIP*5]=CRGB::Red;
       }
     }*/
+    bgColor=CRGB(15,0,0);
+fill_solid(leds, NUM_LEDS, bgColor);
 char mess[40];
 int f=250;
  int offset = LED_WIDTH;
@@ -789,7 +888,7 @@ for(int i=0;i<NUM_STRIPS;i++)
 {
   int y=LED_HEIGHT_PER_STRIP*i;
    sprintf(mess," LINE %d ",i+1);
-     // displayPicDouble(cerisecalc, -k%f+ offset -20,cos_table[(int)(k/2)%LED_WIDTH], 14, 14);
+//      displayPicDouble(cerisecalc, -k%f+ offset -20,cos_table[(int)(k/2)%LED_WIDTH], 14, 14);
     displayPicNewInv(fraiseCalc, -k%f+ offset + 14 , y, 11, 10);
     displayPicNewInv(ghostred, -k%f + offset + 30, y, 14, 14);
     displayPicNewInv(ghostyellow, -k%f + offset +46, y, 14, 14);
@@ -797,9 +896,55 @@ for(int i=0;i<NUM_STRIPS;i++)
     displayPicNewInv(ghostPurple, -k%f + offset +78, y, 14, 14);
     displayPicNewInv(ghostCyan, -k%f + offset + 94, y, 14, 14);
 displayPicNewInv(mariocalc, -k%f + offset+110 , y, 14, 17);
-    afficheMessage2(mess,-k%f+140 ,y); //16-k%(7*16)
+    afficheMessage2(mess,-k%f+130+offset ,y); //16-k%(7*16)
 }
 
+ /*
+bgColor=CRGB(15,15,15);
+fill_solid(leds, NUM_LEDS, bgColor);
+//fill(bgColor);
+
+ if(dire>=0)
+             {
+                r=r+1;
+                if(r>100)
+                  dire=-1;
+             }
+              else
+              {
+                r=r-1;
+                if(r<1)
+                  dire=0;
+              }
+              //r=(r+(int)k/10)%20;
+             //fill(CRGB(5, 5, 5));
+              dessinePoly(61,24, r,k*pi/360,3,CRGB::Red);
+             int r1=r-10;
+             dessinePoly(61,24, r1,k*1.5*pi/360,6,CRGB::Green);
+  
+              r1=r-20;
+ 
+             dessinePoly(61,24, r1,-k*pi/360,5,CRGB::Yellow);
+              r1=r-30;
+           dessinePoly(61,24, r1,+k*2*pi/360,4,CRGB::Blue);
+                     
+              r1=r-40;      
+             dessinePoly(61,24, r1,-k*1.5*pi/360,3,CRGB::Purple);
+             r1=r-50;
+             dessinePoly(61,24, r1,k*1.5*pi/360,6,CRGB::Green);
+  
+              r1=r-60;
+ 
+             dessinePoly(61,24, r1,-k*pi/360,5,CRGB::Yellow);
+              r1=r-70;
+             dessinePoly(61,24, r1,+k*2*pi/360,4,CRGB::Red);
+                     
+              r1=r-80;      
+             dessinePoly(61,24, r1,-k*1.5*pi/360,3,CRGB::Blue);
+             replaceled();
+
+
+trun();*/
 long     lastHandle = __clock_cycles();
    controller.showPixels();
  long   lasthandle2=__clock_cycles();

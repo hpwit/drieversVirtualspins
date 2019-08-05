@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>color picker</title>
+    <link rel="stylesheet" href="screen.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+var websock;
+function start() {
+
+  websock = new WebSocket('ws://'+ window.location.hostname +':83/');
+  websock.onopen = function(evt) { console.log('websock open'); };
+  websock.onclose = function(evt) { console.log('websock close'); };
+  websock.onerror = function(evt) { console.log(evt); };
+  
+}
+
+</script>
+  </head>
+  <body onload="javascript:start();"> 
+    <h1>An HSL Color Picker</h1>
+    <div class="alphaimg">
+      <div class="swatch" style="background-color: hsla(170, 55%, 55%, 1)">
+      </div>
+    </div>
+    <h3 class="colorname">hsla color</h3>
+
+    <form>
+      <h6>HUE</h6>
+      <div class="hue"><input name="hue" type="range" min="1" max="360" value="130" ></div>
+
+      <h6>SATURATION</h6>
+      <div class="satcolor">
+        <div class="sat"><input name="sat" type="range" min="1" max="100" value="100"></div>
+      </div>
+
+      <h6>LIGHT</h6>
+      <div class="light">
+      <input name="light"type="range" min="1" max="100" value="55"></div>
+      <h6>ALPHA</h6>
+      <div class="alphaimg2">
+        <div class="alpha">
+        <input name="alpha"type="range" min="0" max="255" step="1" value="1">
+        </div>
+      </div>
+    </form>
+<button id="new" >NEW PARTY</button><button id="stop" >STOP</button>
+
+    <script src="main.js" charset="utf-8"></script>
+    <script>
+	  $("#stop").click(function(){
+	
+	websock.send("stop");
+});	
+		$("#new").click(function(){
+
+	$("div.case").css("background-color","#000000");
+	websock.send("new");
+});		
+	  </script>
+  </body>
+</html>

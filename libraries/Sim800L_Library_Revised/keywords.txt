@@ -1,0 +1,70 @@
+#######################################
+# Syntax Coloring Map For Sim800L
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Sim800L	KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+
+
+
+
+# Methods for calling (KEYWORD2)
+#######################################
+answerCall	KEYWORD2
+callNumber	KEYWORD2
+hangoffCall	KEYWORD2
+
+
+# Methods for Sms (KEYWORD2)
+#######################################
+sendSms	KEYWORD2
+readSms	KEYWORD2 
+delAllSms	KEYWORD2
+getNumberSms	KEYWORD2
+
+# Methods for Module (KEYWORD2)
+#######################################
+begin	KEYWORD2 
+reset	KEYWORD2
+
+setSleepMode	KEYWORD2
+setFunctionalityMode	KEYWORD2
+
+setPIN	KEYWORD2
+getProductInfo	KEYWORD2
+
+getOperatorsList	KEYWORD2
+getOperator	KEYWORD2
+
+calculateLocation	KEYWORD2
+getLocationCode	KEYWORD2
+getLongitude	KEYWORD2
+getLatitude	KEYWORD2
+
+answerCall	KEYWORD2
+callNumber	KEYWORD2
+hangoffCall	KEYWORD2
+getCallStatus	KEYWORD2
+
+sendSms	KEYWORD2
+readSms	KEYWORD2
+getNumberSms	KEYWORD2
+delAllSms	KEYWORD2
+
+signalQuality	KEYWORD2
+setPhoneFunctionality	KEYWORD2
+activateBearerProfile	KEYWORD2
+deactivateBearerProfile	KEYWORD2
+
+RTCtime	KEYWORD2
+dateNet	KEYWORD2
+updateRtc	KEYWORD2

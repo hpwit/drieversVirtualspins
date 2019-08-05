@@ -24,7 +24,7 @@
 #include "rom/lldesc.h"
 #include "DMABuffer.h"
 #include "FastLed.h"
-#define NUM_VIRT_PINS 5
+#define NUM_VIRT_PINS 5 
 #ifndef NBIS2SERIALPINS
 #define NBIS2SERIALPINS 1
 #endif
@@ -141,7 +141,7 @@ void setBrightness(uint8_t b)
     
     void pu(uint32_t* buff)
     {
-	memset((uint8_t*)buff,0,(NUM_VIRT_PINS+1)*8*3*4);
+	memset((uint8_t*)buff,0,(NUM_VIRT_PINS+1)*8*3*4*3);
 	for (int i=0;i<24*3;i++)
 		{
 		 buff[NUM_VIRT_PINS+i*(NUM_VIRT_PINS+1)]=0x80000000;
@@ -368,11 +368,12 @@ void fillbuffer6(uint32_t *buff)
   int nbpins=20;//	this->nbpins;
   
   
-  
+   uint32_t l2=ledToDisplay;
 	 uint32_t offset=(7)*(NUM_VIRT_PINS+1)*3+2*NUM_VIRT_PINS;
    for (int line=0;line<NUM_VIRT_PINS;line++){
-   uint32_t l=ledToDisplay+nun_led_per_strip*line;
-        for(int pin=0;pin<NBIS2SERIALPINS;pin++) {
+   //uint32_t l=ledToDisplay+nun_led_per_strip*line;
+     uint32_t l=l2;
+	    for(int pin=0;pin<NBIS2SERIALPINS;pin++) {
 
 	//uint32_t l=ledToDisplay+nun_led_per_strip*line+pin*nun_led_per_strip*5;
  
@@ -384,6 +385,7 @@ void fillbuffer6(uint32_t *buff)
 
 
 			}
+			 l2+=nun_led_per_strip;
 			 //putPixelinBuffer2(firstPixel,buff,line);
 			/* transpose16x1_noinline2(pixel[0].bytes,(uint8_t*)&buff[(7)*18+10-line]+1,18*4);
         		transpose16x1_noinline2(pixel[1].bytes,(uint8_t*)&buff[(7+1*8)*18+10-line]+1,18*4);

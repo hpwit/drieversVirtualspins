@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include <WiFiUdp.h>
 #elif defined(ESP32)
 #include <WiFi.h>
-#include <WiFiUdp.h>
+#include <udp.h> //<WiFiUdp.h>
 #else
 #include <Ethernet.h>
 #include <EthernetUdp.h>

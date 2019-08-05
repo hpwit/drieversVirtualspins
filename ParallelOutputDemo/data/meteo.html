@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>index.html</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+<div id="result"></div>
+<button id="up">UP</button>
+<button id="down">DOWN</button>
+
+<script>
+	$("#result").html("kk")
+var urlBase = "http://api.openweathermap.org";//http://samples.openweathermap.org/data/2.5/weather?zip=94040,us&appid=b1b15e88fa797225412429c1c50c122a1
+$("#up").click(function(){
+	alert("ee");
+$.getJSON(urlBase+"/data/2.5/weather?zip=1000,be&appid=cee2dece9fdd919d420d4f5972ec3f1e",function(data){
+	alert(data.weather.id)
+$("#result").html(data);
+}); 
+});
+	
+$("#down").click(function(){
+$.ajax({
+  url: urlBase+"/data/2.5/weather?zip=1000,be&appid=cee2dece9fdd919d420d4f5972ec3f1e",
+  headers: { 'Origin': '*' },
+  dataType:"jsonp",
+  success: function (data) {
+    console.log(data)
+    alert(Math.round(parseInt(data.main.temp)-273.15));
+  }
+});});	
+</script>
+</body>
+</html>

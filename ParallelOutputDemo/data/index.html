@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>index.html</title>
+ <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+ <script type="text/javascript" src="farbtastic.js"></script>
+ <link rel="stylesheet" href="farbtastic.css" type="text/css" />
+ <style type="text/css" media="screen">
+   .colorwell {
+     border: 2px solid #fff;
+     width: 6em;
+     text-align: center;
+     cursor: pointer;
+   }
+   body .colorwell-selected {
+     border: 2px solid #000;
+     font-weight: bold;
+	   
+   }
+ </style>
+<script>
+	
+	
+var websock;
+function start_polo() {
+//alert("e");
+	websock = new WebSocket('ws://' + window.location.hostname+ ':81/');
+  websock.onopen = function(evt) { console.log('websock open'); };
+  websock.onclose = function(evt) { console.log('websock close'); };
+  websock.onerror = function(evt) { console.log(evt); };
+  websock.onmessage = function(evt) {
+    console.log(evt);
+    var e = document.getElementById('ledstatus');
+    if (evt.data === 'ledon') {
+      e.style.color = 'red';
+    }
+    else if (evt.data === 'ledoff') {
+      e.style.color = 'black';
+    }
+    else {
+      console.log('unknown event');
+    }
+  };
+}
+function buttonclick(e) {
+  websock.send(e.id);
+}
+</script>
+</head>
+<body  onload="">
+NEW VERSION
+<button id="up">UP</button>
+<button id="down">DOWN</button>
+<button id="up2">UP2</button>
+<button id="down2">DOWN2</button>
+<button id="pac">PACMAN</button>
+<button id="pac1">SCROLL</button>
+<button id="meteo">METEO</button>
+<button id="textf">TEXTE FIXE</button>
+<button id="tetris">TETRIS</button>
+<button id="anim">ANIM</button>
+<br/>
+TEXT SCROLLING:<input type="text" id="scrolltext" value="Enter your text here"><button id="sc">UPDATE TEXT</button><br/>
+VITESSE:<input type="text" id="speed" value="100"><button id="sp">UPDATE SPEED</button>
+<form action="" style="width: 400px;">
+  <div class="form-item"><label for="color">Color:</label><input type="text" id="color" name="color" value="#123456" /></div><div id="picker"></div>
+</form>
+<button id="bg">UPDATE BACKGROUND COLOR</button><button id="c">UPDATE ETXT COLOR</button><br/>
+LUMINOSITE:<input type="text" id="bri" value="100"><button id="br">UPDATE LUMINOSITE</button>
+GAMMAR:<input type="text" id="gammar" value="2.3"><button id="gr">UPDATE GAMMAR</button>
+GAMMAR:<input type="text" id="gammab" value="2.3"><button id="gb">UPDATE GAMMAB</button>
+  
+  
+  <script>
+//	  $(document).ready(function() {
+    //$('#demo').hide();
+    $('#picker').farbtastic('#color');
+		  
+//  });
+	
+	
+	function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+	
+
+	
+    var urlBase = "http://"+window.location.hostname;
+	
+	
+$("#bg").click(function(){
+	//alert("ee");
+	rgb=hexToRgb($("#color").val());
+	
+$.get(urlBase+"/bg?r="+rgb.r+"&b="+rgb.b+"&g="+rgb.g,function(data){ }); 
+});	
+
+$("#c").click(function(){
+	//alert("ee");
+	rgb=hexToRgb($("#color").val());
+	
+$.get(urlBase+"/c?r="+rgb.r+"&b="+rgb.b+"&g="+rgb.g,function(data){ }); 
+});	
+	
+	
+	
+$("#up").click(function(){
+	//alert("ee");
+$.get(urlBase+"/up",function(data){ }); 
+});
+	
+$("#down").click(function(){
+$.get(urlBase+"/down",function(data){}); 
+});	
+
+$("#up2").click(function(){
+	//alert("ee");
+websock.send("up"); 
+});
+	
+$("#down2").click(function(){
+websock.send("down");  
+});		
+	
+$("#meteo").click(function(){
+$.get(urlBase+"/meteo",function(data){}); 
+});		
+	
+	
+$("#textf").click(function(){
+$.get(urlBase+"/change?v=affiche",function(data){}); 
+});	
+
+	
+$("#pac").click(function(){
+$.get(urlBase+"/change?v=pacman",function(data){}); 
+});	
+	
+$("#tetris").click(function(){
+$.get(urlBase+"/change?v=tetris",function(data){
+	$(location).attr("href","http://192.168.1.40/test.html")
+}); 
+	
+});		  
+	  
+$("#pac1").click(function(){
+$.get(urlBase+"/change?v=scroll",function(data){}); 
+});	
+	
+$("#sc").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+$.get(urlBase+"/changetext?v="+$("#scrolltext").val().toUpperCase(),function(data){}); 	
+});	
+
+	  $("#anim").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+$.get(urlBase+"/anim",function(data){}); 	
+});	
+$("#sp").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+$.get(urlBase+"/s?s="+parseInt($("#speed").val()),function(data){}); 	
+});	
+	
+	
+	
+$("#br").click(function(){
+//$.get(urlBase+"/change?v=scroll",function(data){}); 
+//alert($("#scrolltext").attr("value"));
+$.get(urlBase+"/b?r="+parseInt($("#bri").val()),function(data){}); 	
+});	
+
+$("#gr").click(function(){
+               //$.get(urlBase+"/change?v=scroll",function(data){});
+               //alert($("#scrolltext").attr("value"));
+               $.get(urlBase+"/gr?r="+parseInt($("#gammar").val()),function(data){});
+               });
+
+  $("#gb").click(function(){
+                                  //$.get(urlBase+"/change?v=scroll",function(data){});
+                                  //alert($("#scrolltext").attr("value"));
+                                  $.get(urlBase+"/gb?r="+parseInt($("#gammab").val()),function(data){});
+                                  });
+</script>
+</body>
+</html>

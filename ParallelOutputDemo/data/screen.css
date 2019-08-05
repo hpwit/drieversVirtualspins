@@ -1,0 +1,105 @@
+html {
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font: 16px / 1 sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  padding: 1em;
+  background-color: hsl(219, 6%, 90%);
+  font-family: 'Montserrat', sans-serif;
+}
+
+h1 {
+  margin: auto;
+  padding: 1em;
+}
+
+.alphaimg {
+  height: 200px;
+  width: 200px;
+  border-style: solid;
+  border-color: grey;
+  background-image: url(test_b_check.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border-radius: 5px;
+  margin: auto;
+}
+
+.swatch {
+  height: 200px;
+  width: 200px;
+  border-radius: 1px;
+  margin-bottom: 1em;
+}
+
+h3 {
+  margin: auto;
+  text-align: center;
+  padding-top: 1em;
+}
+
+img {
+  height: 200px;
+  width: 200px;
+}
+
+.sliders {
+  margin: auto;
+  padding: 1em;
+  justify-content: flex-start;
+  align-content: center;
+}
+
+form {
+  margin: auto;
+}
+
+input {
+  width: 400px;
+  margin: 5px;
+}
+
+.hue {
+  background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+  border-radius: 3px;
+  border-style: solid;
+  border-width: thin;
+}
+
+.satcolor {
+  background-color:  transparent;
+}
+
+.sat {
+  background-image: linear-gradient(to right, #494949 0%, transparent 100%), linear-gradient(to right, #fff 0%, transparent 0%);
+  border-radius: 3px;
+  border-style: solid;
+  border-width: thin;
+}
+
+.light {
+  background-image: linear-gradient(to right, #000 0%, transparent 100%), linear-gradient(to right, #fff 0%, transparent 100%);
+  border-radius: 3px;
+  border-style: solid;
+  border-width: thin;
+}
+
+.alphaimg2 {
+  background-image: url(test_b_check.jpg);
+  background-position: center;
+  background-size: contain;
+}
+
+.alpha {
+  background-image: linear-gradient(to right, hsla(66, 31%, 94%, 0.18), white);
+  border-radius: 3px;
+  border-style: solid;
+  border-width: thin;
+}
