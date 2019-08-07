@@ -847,10 +847,10 @@ void replaceled()
 
 void trun()
 {
-  exchange(0,6);
-  exchange(2,4);
-  exchange(8,14);
-  exchange(10,12);
+  exchange(0,6); //1-7
+  exchange(2,4); //3-5
+  exchange(8,14); //9-15
+  exchange(10,12); //11-13
 //  exchange(1,7);
  // exchange(3,5);
   
