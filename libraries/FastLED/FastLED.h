@@ -161,6 +161,9 @@ enum EBlockChipsets {
 	TM1803_PORTDC,
 	UCS1903_PORTDC,
 #endif
+#ifdef ESP32_VIRTUAL_DRIVER
+	VIRTUAL_DRIVER,
+#endif
 };
 
 #if defined(LIB8_ATTINY)
@@ -397,7 +400,14 @@ public:
 	}
 #endif
 	//@}
-
+#ifdef ESP32_VIRTUAL_DRIVER
+template<EBlockChipsets CHIPSET,int *Pins,int CLOCK_PIN,int LATCH_PIN,int NUM_LED_PER_STRIP>
+static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+switch(CHIPSET) {
+			case VIRTUAL_DRIVER: {static ClocklessController<Pins,CLOCK_PIN,LATCH_PIN,NUM_LED_PER_STRIP, GRB> controller; return  addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			}
+}
+#endif
 
 #ifdef FASTLED_HAS_BLOCKLESS
 
