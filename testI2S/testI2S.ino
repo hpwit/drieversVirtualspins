@@ -1,7 +1,6 @@
 
 
 
-#include "FastLED.h"
 //uint8_t pixelg[8][8] ={{ 64, 0, 0, 255, 10, 25, 24, 129},{0, 255,  255, 0, 10, 25, 24, 129},{1, 0, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129}};
 //uint8_t pixelr[8][8] ={{ 0, 255, 0, 0, 10, 25, 24, 129},{255, 255, 0,  255, 10, 25, 24, 129},{1, 0, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129}};
 //uint8_t pixelb[8][8] ={{ 0, 0,255, 255, 10, 25, 24, 129},{0,    0,   0,  255, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129},{1, 255, 8, 9, 10, 25, 24, 129}};
@@ -15,15 +14,20 @@
 #define UP_LEFT_INV      6
 #define UP_RIGHT_INV 7
 #define LED_WIDTH 16
-#define NUM_STRIPS 20
+#define NUM_STRIPS NBIS2SERIALPINS * 5
 #define LED_HEIGHT_PER_STRIP 16
 #define NUM_LEDS_PER_STRIP LED_HEIGHT_PER_STRIP*LED_WIDTH
 #define LED_HEIGHT NUM_STRIPS*LED_HEIGHT_PER_STRIP
  //up to 22
 #define NUM_LEDS NUM_STRIPS * NUM_LEDS_PER_STRIP
-#define NBIS2SERIALPINS 4
-#include "I2S.h"
+#define ESP32_VIRTUAL_DRIVER true
+#define NBIS2SERIALPINS 13
+
+#include "FastLED.h"
+//#include "I2S.h"
 #include "fontamstrad.h"
+#define LATCH_PIN 12
+#define CLOCK_PIN 27
 CRGB solidColor = CRGB(0, 0, 0);
 CRGB bgColor = CRGB(10,10,10);
 CRGB Color = CRGB :: Blue;
@@ -69,9 +73,9 @@ void PixelOn(int x,int y,CRGB Color)
 #include "graphicfunction.h"
 int tableOrientation=DOWN_RIGHT_INV;
     
-int Pins[4]={14,4,5,15};//,-1,-1,-1,-1,18,19,21,23,25,22,0,-1,3,16,15,33};//,-1,-1,-1,12};
+int Pins[14]={13,14,26,25,33,32,15,4,5,18,19,21,22,23};//,-1,-1,-1,-1,18,19,21,23,25,22,0,-1,3,16,15,33};//,-1,-1,-1,12};
 
-I2S controller(0);
+//I2S controller(0);
 
 
 
@@ -751,18 +755,19 @@ Serial.printf("%d:%d:%d %d\n",d[0],d[1],d[2],(uint32_t)*f);
   
  Serial.println("init ready");
  Serial.printf("nb pins %d %d %d\n",1,sizeof(Pins),sizeof(*Pins));
-controller.initled(leds,Pins,4,12,27,NUM_STRIPS,NUM_LEDS_PER_STRIP);
+//controller.initled(leds,Pins,NBIS2SERIALPINS,12,27,NUM_STRIPS,NUM_LEDS_PER_STRIP);
+ FastLED.addLeds<VIRTUAL_DRIVER,Pins,CLOCK_PIN, LATCH_PIN,NUM_LEDS_PER_STRIP>(leds,NUM_LEDS);
 
 //controller.initled(leds,Pins,NUM_STRIPS,NUM_LEDS_PER_STRIP,0); more suitable for ws2811
 Serial.printf("nb pins %d %d %d\n",1,sizeof(Pins),sizeof(*Pins));
 fill_solid(leds,NUM_LEDS,CRGB::Black);
-//controller.showPixels();
-controller.setBrightness(60); //to be used instead of fastled.setbritg hness 
+//fastLED.show(); //controller.showPixels();
+//controller.setBrightness(20); //to be used instead of fastled.setbritg hness 
 //delay(200);
  
        
         fill_solid(leds,NUM_LEDS,CRGB(0,0,0));
-       // controller.showPixels();
+       // fastLED.show(); //controller.showPixels();
         delay(14);
         int k=0;
  for(int pin=0;pin<8;pin++)
@@ -777,14 +782,14 @@ controller.setBrightness(60); //to be used instead of fastled.setbritg hness
     leds[1]=CRGB::Green;
     leds[2]=CRGB::Red;
     leds[3]=CRGB::Blue;
-    controller.showPixels();
+    //fastLED.show(); //controller.showPixels();
     Serial.println("stop");
     //delay(2005);
     leds[0]=CRGB::Blue;
     leds[1]=CRGB::Green;
     leds[2]=CRGB::Red;
     leds[3]=CRGB::Red;
-   // controller.showPixels();
+   // fastLED.show(); //controller.showPixels();
     Serial.println("stop");
    // delay(2000);
 
@@ -878,12 +883,14 @@ void loop() {
        // leds[(k+1)%NUM_LEDS_PER_STRIP+NUM_LEDS_PER_STRIP*line+pin*NUM_LEDS_PER_STRIP*5]=CRGB::Red;
       }
     }*/
-    bgColor=CRGB(15,0,0);
+    bgColor=CRGB(15,15,15);
 fill_solid(leds, NUM_LEDS, bgColor);
 char mess[40];
 int f=250;
  int offset = LED_WIDTH;
  long     lastHandle3 = __clock_cycles();
+ FastLED.setBrightness(64);
+//Serial.printf("b:%d\n",k%256);
 for(int i=0;i<NUM_STRIPS;i++)
 {
   int y=LED_HEIGHT_PER_STRIP*i;
@@ -946,10 +953,10 @@ fill_solid(leds, NUM_LEDS, bgColor);
 
 trun();*/
 long     lastHandle = __clock_cycles();
-   controller.showPixels();
+   FastLED.show(); //controller.showPixels();
  long   lasthandle2=__clock_cycles();
  // Serial.printf("FPS calcul: %f \n", (float) 240000000L/(lastHandle-lastHandle3));
-       Serial.printf("FPS fastled: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
+      Serial.printf("FPS fastled: %f \n", (float) 240000000L/(lasthandle2 - lastHandle));
      //  Serial.printf("total FPS: %f \n", (float) 240000000L/(lasthandle2 - lastHandle3));
    
     k++;

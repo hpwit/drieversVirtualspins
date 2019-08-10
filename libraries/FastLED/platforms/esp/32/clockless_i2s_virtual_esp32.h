@@ -113,14 +113,14 @@ static int CLOCK_DIVIDER_A;
 static int CLOCK_DIVIDER_B;
 static int dmaBufferActive;
 	
-	static  bool stopSignal;
- static  bool runningPixel=false;
+	static volatile bool stopSignal;
+ static volatile bool runningPixel=false;
 	
 	  //CRGB  pixelg[8][5]; //volatile uint8_t pixelg[8][5];
 	   //uint8_t pixelg[16][8][4] ;
 	//volatile uint8_t pixelr[8][5];
 	//volatile uint8_t pixelb[8][5];
-  static  int ledToDisplay;
+  static volatile  int ledToDisplay;
 //CRGB *int_leds;
  static  int dmaBufferCount=2; //we use two buffers
    /* typedef union {
@@ -137,9 +137,12 @@ static int dmaBufferActive;
   static volatile  int num_strips;
  static volatile  int nun_led_per_strip;
    // int *Pins;
-  static  int brigthness;
+  static  int brightness_b;
+  static  int brightness_r;
+  static  int brightness_g;
     static int ledType;
-	 static CRGB *int_leds;
+	 static volatile CRGB *int_leds;
+	 static CRGB m_scale;
 //template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 template<int *Pins,int CLOCK_PIN,int LATCH_PIN,int NUM_LED_PER_STRIP, EOrder RGB_ORDER = GRB>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
@@ -154,8 +157,10 @@ public:
 
     void init()
     {
-        i2sInit();
-      
+       // brigthness=10;
+		
+     //Serial.printf("%d %d %d\n",CLOCK_PIN,LATCH_PIN,NUM_LED_PER_STRIP);
+	 
 	  nun_led_per_strip=  NUM_LED_PER_STRIP;
 	  for (int i = 0; i < NBIS2SERIALPINS; i++)
 		if (Pins[i] > -1)
@@ -174,7 +179,7 @@ public:
 	//if (baseClock > -1)
 	//clock pin
 		gpio_matrix_out(CLOCK_PIN, deviceClockIndex[I2S_DEVICE], false, false);
-       
+       i2sInit();
       
     }
     
@@ -277,9 +282,9 @@ protected:
         i2s->timing.val = 0;
         
         // -- Allocate two DMA buffers
-        dmaBuffers[0] = allocateDMABuffer((NUM_VIRT_PINS+1)*3*8*3);
-        dmaBuffers[1] = allocateDMABuffer((NUM_VIRT_PINS+1)*3*8*3);
-        dmaBuffers[2] = allocateDMABuffer((NUM_VIRT_PINS+1)*3*8*3);
+        dmaBuffers[0] = allocateDMABuffer((NUM_VIRT_PINS+1)*3*8*3*4);
+        dmaBuffers[1] = allocateDMABuffer((NUM_VIRT_PINS+1)*3*8*3*4);
+        dmaBuffers[2] = allocateDMABuffer((NUM_VIRT_PINS+1)*3*8*3*4);
 		
         // -- Arrange them as a circularly linked list
         dmaBuffers[0]->descriptor.qe.stqe_next = &(dmaBuffers[1]->descriptor);
@@ -296,11 +301,11 @@ protected:
                                      &interruptHandler, 0, &gI2S_intr_handle);
         
         // -- Create a semaphore to block execution until all the controllers are done
-        if (gTX_sem == NULL) {
+       /* if (gTX_sem == NULL) {
             gTX_sem = xSemaphoreCreateBinary();
             xSemaphoreGive(gTX_sem);
         }
-        
+        */
         // Serial.println("Init I2S");
         gInitialized = true;
     }
@@ -352,7 +357,18 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
         
+		//Serial.println("Show");
 			int_leds=(CRGB*)pixels.mData;
+			m_scale=pixels.mScale;
+			//Serial.printf("led - r:%d v:%d b%d\n",m_scale.r,m_scale.g,m_scale.b);
+			
+			 brightness_b=m_scale.b;//256/(m_scale.b+1);
+			  brightness_r=m_scale.r;//256/(m_scale.r+1);
+			 brightness_g=m_scale.g;//256/(m_scale.g+1);
+			//for(int j=0;j<50;j++)
+			//{
+				//Serial.printf("led n:%d r:%d v:%d b%d\n",j,int_leds[j].r,int_leds[j].g,int_leds[j].b);
+		//	}
                 ledToDisplay=0;
         stopSignal=false;
  	
@@ -401,10 +417,12 @@ protected:
         }*/
 		
         Lines pixel[3];
-        
+		 if (!i2s->int_st.out_eof)
+		 return;
+         i2s->int_clr.val = i2s->int_raw.val;
         if(stopSignal)
         {
-            //delay(0);
+           // Serial.println("stop");
             i2sStop();
             runningPixel=false;
             return;
@@ -587,6 +605,7 @@ static void fillbuffer6(uint32_t *buff)
   
   
    uint32_t l2=ledToDisplay;
+   //Serial.println(ledToDisplay);
 	 uint32_t offset=(7)*(NUM_VIRT_PINS+1)*3+2*NUM_VIRT_PINS;
    for (int line=0;line<NUM_VIRT_PINS;line++){
    //uint32_t l=ledToDisplay+nun_led_per_strip*line;
@@ -596,9 +615,9 @@ static void fillbuffer6(uint32_t *buff)
 	//uint32_t l=ledToDisplay+nun_led_per_strip*line+pin*nun_led_per_strip*5;
  
  
-			firstPixel[0].bytes[pin] = int_leds[l].g/brigthness;
-            firstPixel[1].bytes[pin] = int_leds[l].r/brigthness;
-            firstPixel[2].bytes[pin] = int_leds[l].b/brigthness;
+			firstPixel[0].bytes[pin] = scale8(int_leds[l].g,brightness_g);//int_leds[l].g/brightness_g;
+            firstPixel[1].bytes[pin] = scale8(int_leds[l].r,brightness_r);//int_leds[l].r/brightness_r;
+            firstPixel[2].bytes[pin] = scale8(int_leds[l].b,brightness_b);//int_leds[l].b/brightness_b;
 			l+=nun_led_per_strip*NUM_VIRT_PINS;
 
 
@@ -623,7 +642,9 @@ static void fillbuffer6(uint32_t *buff)
         i2sReset();
         //Serial.println(dmaBuffers[0]->sampleCount());
         i2s->lc_conf.val=I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN | I2S_OUT_DATA_BURST_EN;
+		//i2s.rx_eof_num = dmaBuffers[2]->sampleCount();
         i2s->out_link.addr = (uint32_t) & (dmaBuffers[2]->descriptor);
+			//i2s.in_link.addr = (uint32_t) & (dmaBuffers[2]->descriptor);
         i2s->out_link.start = 1;
         ////vTaskDelay(5);
         i2s->int_clr.val = i2s->int_raw.val;
